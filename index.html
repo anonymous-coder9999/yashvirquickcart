@@ -1,0 +1,695 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YASHVIR QUICK MART</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          forest: '#0C3B2E',
+          forestdark: '#082B21',
+          lime: '#C6F135',
+        },
+        fontFamily: {
+          display: ['Poppins', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .font-display { font-family: 'Poppins', sans-serif; }
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+  @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .slide-up { animation: slide-up 0.3s ease-out; }
+  @keyframes slide-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  .slide-in-right { animation: slide-in-right 0.25s ease-out; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .fade-in { animation: fade-in 0.25s ease-out; }
+</style>
+</head>
+<body class="bg-[#FAFAF8]">
+<div id="root"></div>
+ 
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+ 
+/* ---------------- DATA ---------------- */
+ 
+const CATEGORIES = [
+  { id: 'all', label: 'All', emoji: '🛒' },
+  { id: 'fruits', label: 'Fruits & Veg', emoji: '🥦' },
+  { id: 'dairy', label: 'Dairy & Eggs', emoji: '🥛' },
+  { id: 'snacks', label: 'Snacks', emoji: '🍿' },
+  { id: 'beverages', label: 'Beverages', emoji: '🧃' },
+  { id: 'bakery', label: 'Bakery', emoji: '🍞' },
+  { id: 'household', label: 'Household', emoji: '🧴' },
+];
+ 
+const PRODUCTS = [
+  { id: 1, name: 'Fresh Bananas', qty: '6 pcs', price: 49, mrp: 60, cat: 'fruits', emoji: '🍌' },
+  { id: 2, name: 'Assam Lemon', qty: '4 pcs', price: 25, mrp: 30, cat: 'fruits', emoji: '🍋' },
+  { id: 3, name: 'Baby Spinach', qty: '200 g', price: 35, mrp: 40, cat: 'fruits', emoji: '🥬' },
+  { id: 4, name: 'Red Tomatoes', qty: '500 g', price: 28, mrp: 35, cat: 'fruits', emoji: '🍅' },
+  { id: 5, name: 'Farm Eggs', qty: '12 pcs', price: 89, mrp: 99, cat: 'dairy', emoji: '🥚' },
+  { id: 6, name: 'Toned Milk', qty: '1 L', price: 58, mrp: 62, cat: 'dairy', emoji: '🥛' },
+  { id: 7, name: 'Greek Yogurt', qty: '400 g', price: 110, mrp: 130, cat: 'dairy', emoji: '🍦' },
+  { id: 8, name: 'Cheddar Cheese', qty: '200 g', price: 145, mrp: 170, cat: 'dairy', emoji: '🧀' },
+  { id: 9, name: 'Salted Chips', qty: '52 g', price: 20, mrp: 20, cat: 'snacks', emoji: '🍟' },
+  { id: 10, name: 'Choco Cookies', qty: '150 g', price: 45, mrp: 55, cat: 'snacks', emoji: '🍪' },
+  { id: 11, name: 'Roasted Peanuts', qty: '200 g', price: 60, mrp: 70, cat: 'snacks', emoji: '🥜' },
+  { id: 12, name: 'Popcorn Butter', qty: '90 g', price: 40, mrp: 45, cat: 'snacks', emoji: '🍿' },
+  { id: 13, name: 'Orange Juice', qty: '1 L', price: 99, mrp: 120, cat: 'beverages', emoji: '🧃' },
+  { id: 14, name: 'Cola Can', qty: '300 ml', price: 40, mrp: 40, cat: 'beverages', emoji: '🥤' },
+  { id: 15, name: 'Assam Tea', qty: '250 g', price: 150, mrp: 180, cat: 'beverages', emoji: '🍵' },
+  { id: 16, name: 'Filter Coffee', qty: '200 g', price: 180, mrp: 210, cat: 'beverages', emoji: '☕' },
+  { id: 17, name: 'Multigrain Bread', qty: '400 g', price: 55, mrp: 60, cat: 'bakery', emoji: '🍞' },
+  { id: 18, name: 'Butter Croissant', qty: '2 pcs', price: 70, mrp: 80, cat: 'bakery', emoji: '🥐' },
+  { id: 19, name: 'Chocolate Muffin', qty: '4 pcs', price: 120, mrp: 140, cat: 'bakery', emoji: '🧁' },
+  { id: 20, name: 'Dish Wash Liquid', qty: '500 ml', price: 95, mrp: 110, cat: 'household', emoji: '🧴' },
+  { id: 21, name: 'Toilet Paper', qty: '4 rolls', price: 130, mrp: 150, cat: 'household', emoji: '🧻' },
+  { id: 22, name: 'Room Freshener', qty: '250 ml', price: 85, mrp: 99, cat: 'household', emoji: '🌸' },
+];
+ 
+const SUPPORT_EMAIL = 'techyg424@gmail.com';
+ 
+/* ---------------- UTIL ---------------- */
+ 
+const currency = (n) => `₹${n}`;
+const isAssamPincode = (pin) => /^78\d{4}$/.test(pin.trim());
+const isValidMobile = (m) => /^[6-9]\d{9}$/.test(m.trim());
+const isValidEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim());
+ 
+/* ---------------- AUTH SCREEN ---------------- */
+ 
+function AuthScreen({ onAuth }) {
+  const [mode, setMode] = useState('signup'); // 'signup' | 'signin'
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+ 
+  const submit = (e) => {
+    e.preventDefault();
+    setError('');
+    if (!isValidEmail(email)) { setError('Please enter a valid email address.'); return; }
+    if (password.length < 4) { setError('Password should be at least 4 characters.'); return; }
+    if (mode === 'signup' && name.trim().length < 2) { setError('Please enter your name.'); return; }
+    onAuth({ name: mode === 'signup' ? name.trim() : email.split('@')[0], email: email.trim() });
+  };
+ 
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-forest px-4">
+      <div className="w-full max-w-sm bg-white rounded-3xl p-8 shadow-2xl fade-in">
+        <div className="text-center mb-6">
+          <p className="font-display font-extrabold text-2xl">
+            <span className="text-forest">YASHVIR</span> <span className="text-lime bg-forest px-1.5 rounded">QUICK</span>
+          </p>
+          <p className="font-display font-bold text-forestdark text-sm tracking-widest mt-1">M A R T</p>
+          <p className="text-gray-400 text-xs mt-2">Groceries delivered fast — only in Assam</p>
+        </div>
+ 
+        <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+          <button
+            onClick={() => { setMode('signup'); setError(''); }}
+            className={`flex-1 py-2 rounded-lg text-sm font-semibold font-display transition ${mode === 'signup' ? 'bg-forest text-white' : 'text-gray-500'}`}
+          >
+            Sign Up
+          </button>
+          <button
+            onClick={() => { setMode('signin'); setError(''); }}
+            className={`flex-1 py-2 rounded-lg text-sm font-semibold font-display transition ${mode === 'signin' ? 'bg-forest text-white' : 'text-gray-500'}`}
+          >
+            Sign In
+          </button>
+        </div>
+ 
+        <form onSubmit={submit} className="space-y-3">
+          {mode === 'signup' && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">Full name</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Yashvir Paul"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest"
+              />
+            </div>
+          )}
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Email address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest"
+            />
+          </div>
+ 
+          {error && <p className="text-red-500 text-xs">{error}</p>}
+ 
+          <button
+            type="submit"
+            className="w-full bg-lime text-forestdark font-display font-bold py-3 rounded-xl hover:brightness-95 transition mt-2"
+          >
+            {mode === 'signup' ? 'Create account' : 'Sign in'}
+          </button>
+        </form>
+ 
+        <p className="text-center text-[11px] text-gray-400 mt-5">
+          No verification code needed — just sign up and start ordering.
+        </p>
+      </div>
+    </div>
+  );
+}
+ 
+/* ---------------- SHOP COMPONENTS ---------------- */
+ 
+function DeliveryBadge() {
+  const [minutes, setMinutes] = useState(11);
+  useEffect(() => {
+    const t = setInterval(() => setMinutes((m) => (m <= 8 ? 11 : m - 1)), 4000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="flex items-center gap-2 bg-forestdark/40 rounded-full px-3 py-1.5">
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="pulse-dot absolute inline-flex h-full w-full rounded-full bg-lime"></span>
+      </span>
+      <span className="text-white text-sm font-semibold font-display">Delivery in {minutes} mins</span>
+    </div>
+  );
+}
+ 
+function Header({ user, search, setSearch, cartCount, onCartClick, onLogout, onSupportClick }) {
+  return (
+    <div className="sticky top-0 z-30 bg-forest shadow-lg">
+      <div className="max-w-6xl mx-auto px-4 pt-4 pb-3">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xl md:text-2xl font-display font-extrabold text-lime">YASHVIR</span>
+              <span className="text-xl md:text-2xl font-display font-extrabold text-white">QUICK MART</span>
+            </div>
+            <p className="text-white/60 text-xs mt-0.5">Hi {user.name} · Delivering across Assam only</p>
+          </div>
+          <DeliveryBadge />
+        </div>
+ 
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search for atta, fruits, milk..."
+              className="w-full rounded-xl bg-white/95 px-4 py-2.5 pl-10 text-sm text-forestdark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-lime"
+            />
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <button
+            onClick={onSupportClick}
+            title="Support"
+            className="bg-forestdark/60 text-white rounded-xl px-3 py-2.5 hover:bg-forestdark transition"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+          <button
+            onClick={onCartClick}
+            className="relative bg-lime text-forestdark rounded-xl px-4 py-2.5 flex items-center gap-2 font-semibold text-sm hover:brightness-95 transition"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Cart
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-forest text-lime text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={onLogout}
+            title="Log out"
+            className="text-white/70 hover:text-white text-xs font-medium underline underline-offset-2 hidden sm:block"
+          >
+            Log out
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+ 
+function CategoryRail({ active, setActive }) {
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-4 overflow-x-auto">
+      <div className="flex gap-3 w-max">
+        {CATEGORIES.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => setActive(c.id)}
+            className={`flex flex-col items-center justify-center gap-1 min-w-[76px] rounded-2xl px-3 py-2.5 border transition ${
+              active === c.id ? 'bg-forest border-forest text-white shadow-md scale-105' : 'bg-white border-gray-200 text-forestdark hover:border-forest/40'
+            }`}
+          >
+            <span className="text-xl">{c.emoji}</span>
+            <span className="text-[11px] font-medium font-display text-center leading-tight">{c.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+ 
+function ProductCard({ product, qtyInCart, onAdd, onRemove }) {
+  const discount = product.mrp > product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-3 flex flex-col hover:shadow-md transition">
+      <div className="relative bg-gray-50 rounded-xl h-24 flex items-center justify-center text-4xl mb-2">
+        {product.emoji}
+        {discount > 0 && (
+          <span className="absolute top-1 left-1 bg-forest text-lime text-[10px] font-bold px-1.5 py-0.5 rounded-md">{discount}% OFF</span>
+        )}
+      </div>
+      <p className="text-[11px] text-gray-400 font-medium mb-0.5">{product.qty}</p>
+      <p className="text-sm font-semibold text-forestdark leading-tight mb-1.5 line-clamp-2 flex-1">{product.name}</p>
+      <div className="flex items-center gap-1.5 mb-2">
+        <span className="font-display font-bold text-sm text-forestdark">{currency(product.price)}</span>
+        {product.mrp > product.price && <span className="text-xs text-gray-400 line-through">{currency(product.mrp)}</span>}
+      </div>
+      {qtyInCart === 0 ? (
+        <button onClick={() => onAdd(product)} className="w-full border-2 border-forest text-forest font-bold text-sm rounded-xl py-1.5 hover:bg-forest hover:text-white transition">
+          ADD
+        </button>
+      ) : (
+        <div className="w-full flex items-center justify-between bg-forest rounded-xl overflow-hidden">
+          <button onClick={() => onRemove(product)} className="text-white font-bold w-8 py-1.5 hover:bg-forestdark transition">−</button>
+          <span className="text-white font-bold text-sm">{qtyInCart}</span>
+          <button onClick={() => onAdd(product)} className="text-white font-bold w-8 py-1.5 hover:bg-forestdark transition">+</button>
+        </div>
+      )}
+    </div>
+  );
+}
+ 
+function CartDrawer({ cart, products, onAdd, onRemove, onClose, onGoToCheckout }) {
+  const items = Object.entries(cart).map(([id, qty]) => ({ ...products.find((p) => p.id === Number(id)), qty })).filter((i) => i.qty > 0);
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const savings = items.reduce((sum, i) => sum + (i.mrp - i.price) * i.qty, 0);
+  const deliveryFee = subtotal > 199 || subtotal === 0 ? 0 : 25;
+  const total = subtotal + deliveryFee;
+ 
+  return (
+    <div className="fixed inset-0 z-40 flex justify-end">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose}></div>
+      <div className="relative slide-in-right w-full max-w-md bg-[#FAFAF8] h-full flex flex-col shadow-2xl">
+        <div className="bg-forest px-5 py-4 flex items-center justify-between">
+          <h2 className="text-white font-display font-bold text-lg">Your Cart</h2>
+          <button onClick={onClose} className="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+ 
+        {items.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+            <span className="text-5xl mb-3">🛒</span>
+            <p className="font-display font-semibold text-forestdark">Your cart is empty</p>
+            <p className="text-sm text-gray-400 mt-1">Add items to see them here.</p>
+          </div>
+        ) : (
+          <>
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 bg-white rounded-xl p-2.5 border border-gray-100">
+                  <div className="bg-gray-50 rounded-lg h-12 w-12 flex items-center justify-center text-2xl shrink-0">{item.emoji}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-forestdark truncate">{item.name}</p>
+                    <p className="text-xs text-gray-400">{item.qty} × {currency(item.price)}</p>
+                  </div>
+                  <div className="flex items-center bg-forest rounded-lg overflow-hidden shrink-0">
+                    <button onClick={() => onRemove(item)} className="text-white w-7 py-1 hover:bg-forestdark transition">−</button>
+                    <span className="text-white text-sm font-bold w-6 text-center">{item.qty}</span>
+                    <button onClick={() => onAdd(item)} className="text-white w-7 py-1 hover:bg-forestdark transition">+</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+ 
+            <div className="border-t border-gray-200 px-5 py-4 bg-white space-y-2">
+              <div className="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span>{currency(subtotal)}</span></div>
+              {savings > 0 && <div className="flex justify-between text-sm text-green-600 font-medium"><span>Savings</span><span>−{currency(savings)}</span></div>}
+              <div className="flex justify-between text-sm text-gray-500"><span>Delivery fee</span><span>{deliveryFee === 0 ? 'FREE' : currency(deliveryFee)}</span></div>
+              <div className="flex justify-between font-display font-bold text-forestdark text-base pt-2 border-t border-dashed border-gray-200"><span>To pay</span><span>{currency(total)}</span></div>
+              <button onClick={onGoToCheckout} className="w-full mt-2 bg-lime text-forestdark font-display font-bold py-3 rounded-xl hover:brightness-95 transition">
+                Proceed to checkout
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+ 
+function CheckoutModal({ user, total, onClose, onPlaceOrder }) {
+  const [form, setForm] = useState({ name: user.name || '', mobile: '', email: user.email || '', address: '', pincode: '' });
+  const [errors, setErrors] = useState({});
+ 
+  const update = (field, value) => setForm((f) => ({ ...f, [field]: value }));
+ 
+  const validate = () => {
+    const e = {};
+    if (form.name.trim().length < 2) e.name = 'Please enter your full name.';
+    if (!isValidMobile(form.mobile)) e.mobile = 'Enter a valid 10-digit mobile number.';
+    if (!isValidEmail(form.email)) e.email = 'Enter a valid email address.';
+    if (form.address.trim().length < 8) e.address = 'Please enter your full delivery address.';
+    if (!/^\d{6}$/.test(form.pincode.trim())) {
+      e.pincode = 'Enter a valid 6-digit pincode.';
+    } else if (!isAssamPincode(form.pincode)) {
+      e.pincode = 'Sorry — we currently deliver only within Assam (pincodes starting with 78).';
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+ 
+  const submit = (ev) => {
+    ev.preventDefault();
+    if (validate()) onPlaceOrder(form);
+  };
+ 
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto fade-in">
+        <div className="bg-forest px-6 py-4 rounded-t-3xl flex items-center justify-between sticky top-0">
+          <h2 className="text-white font-display font-bold text-lg">Delivery details</h2>
+          <button onClick={onClose} className="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+ 
+        <form onSubmit={submit} className="p-6 space-y-3">
+          <p className="text-xs text-gray-400 -mt-1 mb-1">We currently deliver only within Assam. Please double-check your pincode.</p>
+ 
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Full name</label>
+            <input value={form.name} onChange={(e) => update('name', e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest" />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+          </div>
+ 
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Mobile number</label>
+            <input value={form.mobile} onChange={(e) => update('mobile', e.target.value)} placeholder="10-digit mobile number" className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest" />
+            {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
+          </div>
+ 
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Email address</label>
+            <input value={form.email} onChange={(e) => update('email', e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest" />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          </div>
+ 
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Delivery address</label>
+            <textarea value={form.address} onChange={(e) => update('address', e.target.value)} rows="3" placeholder="House no., street, locality, town/city" className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest resize-none" />
+            {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+          </div>
+ 
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Pincode</label>
+            <input value={form.pincode} onChange={(e) => update('pincode', e.target.value)} placeholder="e.g. 788001" maxLength="6" className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest" />
+            {errors.pincode && <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>}
+          </div>
+ 
+          <div className="flex justify-between font-display font-bold text-forestdark text-base pt-2 border-t border-dashed border-gray-200">
+            <span>To pay</span><span>{currency(total)}</span>
+          </div>
+ 
+          <button type="submit" className="w-full bg-lime text-forestdark font-display font-bold py-3 rounded-xl hover:brightness-95 transition">
+            Confirm order
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+ 
+function OrderSuccess({ order, onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center slide-up">
+        <div className="text-6xl mb-4">✅</div>
+        <h2 className="font-display font-extrabold text-xl text-forestdark mb-2">Order placed!</h2>
+        <p className="text-gray-500 text-sm mb-4">
+          Thanks {order.name.split(' ')[0]}, your groceries are on the way to {order.pincode}.
+        </p>
+        <div className="bg-forest/5 rounded-xl py-3 mb-6">
+          <p className="text-forest font-display font-bold text-2xl">9 mins</p>
+          <p className="text-xs text-gray-400">Estimated delivery time</p>
+        </div>
+        <button onClick={onClose} className="w-full bg-forest text-white font-display font-bold py-3 rounded-xl hover:bg-forestdark transition">
+          Continue shopping
+        </button>
+      </div>
+    </div>
+  );
+}
+ 
+function SupportModal({ onClose }) {
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+ 
+  const sendEmail = () => {
+    const body = encodeURIComponent(message);
+    const subj = encodeURIComponent(subject || 'Query about YASHVIR QUICK MART');
+    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subj}&body=${body}`;
+  };
+ 
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="bg-white rounded-3xl p-6 max-w-sm w-full fade-in">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display font-bold text-lg text-forestdark">Support</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Have a question or an issue with your order? Send us a message and we'll get back to you at <span className="font-medium text-forestdark">{SUPPORT_EMAIL}</span>.
+        </p>
+        <div className="space-y-3">
+          <input
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Subject"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest"
+          />
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows="4"
+            placeholder="Describe your query..."
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest resize-none"
+          />
+        </div>
+        <button onClick={sendEmail} className="w-full mt-4 bg-lime text-forestdark font-display font-bold py-3 rounded-xl hover:brightness-95 transition">
+          Send email to support
+        </button>
+        <p className="text-center text-[11px] text-gray-400 mt-3">
+          This opens your email app addressed to {SUPPORT_EMAIL}.
+        </p>
+      </div>
+    </div>
+  );
+}
+ 
+function StickyCartBar({ count, total, onClick }) {
+  if (count === 0) return null;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-30 slide-up">
+      <div className="max-w-6xl mx-auto px-4 pb-4">
+        <button onClick={onClick} className="w-full bg-forest text-white rounded-2xl px-5 py-4 flex items-center justify-between shadow-2xl hover:brightness-110 transition">
+          <div className="flex items-center gap-3">
+            <span className="bg-lime text-forestdark font-bold text-sm rounded-lg w-7 h-7 flex items-center justify-center">{count}</span>
+            <span className="font-display font-semibold text-sm">{currency(total)}</span>
+          </div>
+          <span className="font-display font-bold text-sm flex items-center gap-1">
+            View cart
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+ 
+function Footer({ onSupportClick }) {
+  return (
+    <footer className="bg-forestdark text-white/70 mt-4">
+      <div className="max-w-6xl mx-auto px-6 py-10 grid sm:grid-cols-3 gap-8 text-sm">
+        <div>
+          <p className="font-display font-bold text-white text-base mb-2">YASHVIR QUICK MART</p>
+          <p className="text-white/50">Fast grocery delivery, proudly serving Assam.</p>
+        </div>
+        <div>
+          <p className="font-display font-semibold text-white mb-2">Service area</p>
+          <p className="text-white/50">We currently deliver only to addresses within Assam (pincodes starting 78).</p>
+        </div>
+        <div>
+          <p className="font-display font-semibold text-white mb-2">Need help?</p>
+          <button onClick={onSupportClick} className="text-lime hover:underline">Contact support</button>
+          <p className="text-white/50 mt-1">{SUPPORT_EMAIL}</p>
+        </div>
+      </div>
+      <div className="border-t border-white/10 py-5 text-center text-white/60 text-sm font-display tracking-wide">
+        BY YASHVIR PAUL
+      </div>
+    </footer>
+  );
+}
+ 
+/* ---------------- APP ---------------- */
+ 
+function App() {
+  const [user, setUser] = useState(null);
+  const [cart, setCart] = useState({});
+  const [activeCat, setActiveCat] = useState('all');
+  const [search, setSearch] = useState('');
+  const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(null);
+ 
+  const handleAdd = (product) => setCart((c) => ({ ...c, [product.id]: (c[product.id] || 0) + 1 }));
+  const handleRemove = (product) => setCart((c) => ({ ...c, [product.id]: Math.max((c[product.id] || 0) - 1, 0) }));
+ 
+  const filtered = useMemo(() => PRODUCTS.filter((p) => {
+    const matchCat = activeCat === 'all' || p.cat === activeCat;
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  }), [activeCat, search]);
+ 
+  const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
+  const cartTotal = Object.entries(cart).reduce((sum, [id, qty]) => {
+    const p = PRODUCTS.find((p) => p.id === Number(id));
+    return sum + (p ? p.price * qty : 0);
+  }, 0);
+  const deliveryFee = cartTotal > 199 || cartTotal === 0 ? 0 : 25;
+  const finalTotal = cartTotal + deliveryFee;
+ 
+  const groupedByCategory = useMemo(() => {
+    if (activeCat !== 'all' || search) return null;
+    const groups = {};
+    CATEGORIES.filter((c) => c.id !== 'all').forEach((c) => { groups[c.id] = PRODUCTS.filter((p) => p.cat === c.id); });
+    return groups;
+  }, [activeCat, search]);
+ 
+  if (!user) {
+    return <AuthScreen onAuth={setUser} />;
+  }
+ 
+  return (
+    <div className="min-h-screen pb-28 flex flex-col">
+      <Header
+        user={user}
+        search={search}
+        setSearch={setSearch}
+        cartCount={cartCount}
+        onCartClick={() => setCartOpen(true)}
+        onLogout={() => { setUser(null); setCart({}); }}
+        onSupportClick={() => setSupportOpen(true)}
+      />
+      <CategoryRail active={activeCat} setActive={setActiveCat} />
+ 
+      <div className="max-w-6xl mx-auto px-4 flex-1 w-full">
+        {groupedByCategory ? (
+          Object.entries(groupedByCategory).map(([catId, items]) => {
+            const cat = CATEGORIES.find((c) => c.id === catId);
+            return (
+              <div key={catId} className="mb-8">
+                <h2 className="font-display font-bold text-lg text-forestdark mb-3">{cat.emoji} {cat.label}</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {items.map((product) => (
+                    <ProductCard key={product.id} product={product} qtyInCart={cart[product.id] || 0} onAdd={handleAdd} onRemove={handleRemove} />
+                  ))}
+                </div>
+              </div>
+            );
+          })
+        ) : filtered.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-8">
+            {filtered.map((product) => (
+              <ProductCard key={product.id} product={product} qtyInCart={cart[product.id] || 0} onAdd={handleAdd} onRemove={handleRemove} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <span className="text-5xl mb-3 block">🔍</span>
+            <p className="font-display font-semibold text-forestdark">No products found</p>
+            <p className="text-sm text-gray-400 mt-1">Try searching for something else.</p>
+          </div>
+        )}
+      </div>
+ 
+      <Footer onSupportClick={() => setSupportOpen(true)} />
+ 
+      <StickyCartBar count={cartCount} total={finalTotal} onClick={() => setCartOpen(true)} />
+ 
+      {cartOpen && (
+        <CartDrawer
+          cart={cart}
+          products={PRODUCTS}
+          onAdd={handleAdd}
+          onRemove={handleRemove}
+          onClose={() => setCartOpen(false)}
+          onGoToCheckout={() => { setCartOpen(false); setCheckoutOpen(true); }}
+        />
+      )}
+ 
+      {checkoutOpen && (
+        <CheckoutModal
+          user={user}
+          total={finalTotal}
+          onClose={() => setCheckoutOpen(false)}
+          onPlaceOrder={(form) => {
+            setCheckoutOpen(false);
+            setOrderPlaced(form);
+            setCart({});
+          }}
+        />
+      )}
+ 
+      {orderPlaced && <OrderSuccess order={orderPlaced} onClose={() => setOrderPlaced(null)} />}
+      {supportOpen && <SupportModal onClose={() => setSupportOpen(false)} />}
+    </div>
+  );
+}
+ 
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
